@@ -15,11 +15,14 @@ import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { createDelivery } from "../../database/delivery";
 import { getAuth } from "firebase/auth";
-export const AddDeliveryScreen = ({ navigation }) => {
+import { useDispatch } from "react-redux";
+import { fetchDeliveries } from "../../store/slices/delivery";
+export const AddDeliveryScreen = ({ route, navigation }) => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("0.1");
   const [markerPosition, setMarkerPosition] = useState("");
+  const dispatch = useDispatch();
 
   const save = async () => {
     if (
@@ -41,6 +44,7 @@ export const AddDeliveryScreen = ({ navigation }) => {
         createdAt: Date.now(),
       };
       await createDelivery(delivery);
+      dispatch(fetchDeliveries({ statusFilter: route.params.statusFilter }));
       navigation.goBack();
     } else Toast.show({ description: "Lleno todos los campos correctamente" });
   };

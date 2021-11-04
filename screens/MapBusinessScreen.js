@@ -9,18 +9,14 @@ import {
 import React, { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { getDeliveries } from "../database/delivery";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDeliveries } from "../store/slices/delivery";
 
 export const MapBusinessScreen = ({ navigation }) => {
-  const [deliveries, setDeliveries] = useState([]);
+  const deliveries = useSelector((state) => state.delivery.deliveries);
+  const dispatch = useDispatch();
   useEffect(() => {
-    let mounted = true;
-    getDeliveries().then((items) => {
-      if (mounted) setDeliveries(items);
-    });
-    return () => {
-      mounted = false;
-    };
+    dispatch(fetchDeliveries({ statusFilter: "all" }));
   }, []);
   return (
     <NativeBaseProvider>
@@ -36,7 +32,6 @@ export const MapBusinessScreen = ({ navigation }) => {
         >
           {deliveries.length > 0
             ? deliveries.map((delivery, index) => {
-                console.log(delivery);
                 return (
                   <Marker
                     key={index}
@@ -65,7 +60,7 @@ export const MapBusinessScreen = ({ navigation }) => {
               <Image
                 source={require("../assets/pins/pin_red.png")}
                 size="2xs"
-                alt="Disponible"
+                alt="Disponible "
               />
               <Text>Disponible</Text>
             </HStack>

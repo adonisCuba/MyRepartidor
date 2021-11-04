@@ -19,6 +19,8 @@ import {
   updateDelivery,
 } from "../../database/delivery";
 import { getAuth } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { fetchDeliveries } from "../../store/slices/delivery";
 export const EditDeliveryScreen = ({ route, navigation }) => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
@@ -26,6 +28,7 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
   const [markerPosition, setMarkerPosition] = useState("");
   const [estado, setEstado] = useState("");
   const { itemId } = route.params;
+  const dispatch = useDispatch();
   useEffect(() => {
     let mounted = true;
     getDelivery(itemId).then((item) => {
@@ -68,6 +71,7 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
         createdAt: Date.now(),
       };
       await updateDelivery(itemId, delivery);
+      dispatch(fetchDeliveries({ statusFilter: route.params.statusFilter }));
       navigation.goBack();
     } else Toast.show({ description: "Lleno todos los campos correctamente" });
   };
@@ -129,7 +133,14 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
           }}
           onPress={onMapPress}
         >
-          {markerPosition ? <Marker coordinate={markerPosition} /> : null}
+          {markerPosition ? (
+            <Marker
+              coordinate={{
+                latitude: markerPosition.latitude,
+                longitude: markerPosition.longitude,
+              }}
+            />
+          ) : null}
         </MapView>
         {estado == "available" ? (
           <>
