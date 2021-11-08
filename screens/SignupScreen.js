@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import {
   Center,
@@ -27,8 +27,9 @@ import {
 import { getFirestore, addDoc, collection } from "firebase/firestore";
 import * as Facebook from "expo-facebook";
 import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
 
-import { LogBox } from "react-native";
+import { LogBox, Platform } from "react-native";
 LogBox.ignoreLogs(["Setting a timer"]);
 
 export const SignupScreen = ({ route, navigation }) => {
@@ -38,6 +39,10 @@ export const SignupScreen = ({ route, navigation }) => {
   const [passwordVisibility, setPasswordVisibility] = useState(false);
   const [rightIcon, setRightIcon] = useState("eye-off");
   const [signError, setSignError] = useState("");
+  const [expoPushToken, setExpoPushToken] = useState("");
+  useEffect(async () => {
+    await registerForPushNotificationsAsync();
+  }, []);
 
   const handlePasswordVisibility = () => {
     if (rightIcon === "eye") {
@@ -88,9 +93,36 @@ export const SignupScreen = ({ route, navigation }) => {
       await addDoc(collection(firestore, "typeUsers"), {
         userId: credentials.user.uid,
         typeUser,
+        expoPushToken,
       });
     } catch (e) {
       console.error("Error adding document: ", e);
+    }
+  };
+
+  const registerForPushNotificationsAsync = async () => {
+    if (Constants.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        alert("Failed to get push token for push notification!");
+        return;
+      }
+      const token = (await Notifications.getExpoPushTokenAsync()).data;
+      setExpoPushToken(token);
+    } else alert("Must use physical device for Push Notifications");
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
     }
   };
 

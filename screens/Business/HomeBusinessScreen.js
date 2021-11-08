@@ -10,10 +10,10 @@ import {
   Divider,
 } from "native-base";
 import React, { useEffect, useState } from "react";
-import { BusinessDeliveryItem } from "../components/BusinessDeliveryItem";
+import { BusinessDeliveryItem } from "../../components/BusinessDeliveryItem";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDeliveries } from "../store/slices/delivery";
+import { fetchDeliveries } from "../../store/slices/delivery";
 
 const config = {
   dependencies: {

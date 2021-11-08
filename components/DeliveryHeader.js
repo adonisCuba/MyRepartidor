@@ -11,7 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getAuth, signOut } from "firebase/auth";
 
-export const BussinessHeader = (props) => {
+export const DeliveryHeader = (props) => {
   const logOut = async () => {
     const auth = getAuth();
     try {

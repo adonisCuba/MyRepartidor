@@ -1,12 +1,12 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { HomeBusinessScreen } from "../screens/HomeBusinessScreen";
+import { HomeBusinessScreen } from "../screens/Business/HomeBusinessScreen";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { MapBusinessScreen } from "../screens/MapBusinessScreen";
+import { MapBusinessScreen } from "../screens/Business/MapBusinessScreen";
 import { BussinessHeader } from "../components/BusinessHeader";
 import { Ionicons } from "@expo/vector-icons";
-import { AddDeliveryScreen } from "../screens/Delivery/AddDeliveryScreen";
-import { EditDeliveryScreen } from "../screens/Delivery/EditDeliveryScreen";
+import { AddDeliveryScreen } from "../screens/Business/Delivery/AddDeliveryScreen";
+import { EditDeliveryScreen } from "../screens/Business/Delivery/EditDeliveryScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -22,6 +22,7 @@ function HomeBusiness() {
         name="Home"
         component={HomeBusinessScreen}
         options={{
+          tabBarLabel: "Inicio",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" size={size} color={color} />
@@ -32,6 +33,7 @@ function HomeBusiness() {
         name="Map"
         component={MapBusinessScreen}
         options={{
+          tabBarLabel: "Mapa",
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="map" size={size} color={color} />
@@ -43,12 +45,6 @@ function HomeBusiness() {
 }
 
 const Stack = createStackNavigator();
-
-const config = {
-  dependencies: {
-    "linear-gradient": require("expo-linear-gradient").LinearGradient,
-  },
-};
 
 export default function BusinessStack() {
   return (

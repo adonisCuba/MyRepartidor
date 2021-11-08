@@ -1,6 +1,7 @@
 import { GeoPoint } from "@firebase/firestore";
 import {
   Button,
+  Center,
   FormControl,
   Input,
   NativeBaseProvider,
@@ -8,48 +9,20 @@ import {
   TextArea,
   Toast,
   VStack,
-  AlertDialog,
 } from "native-base";
-import React, { useState, useEffect, useRef } from "react";
-import { Alert, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import {
-  getDelivery,
-  removeDelivery,
-  updateDelivery,
-} from "../../database/delivery";
+import { createDelivery } from "../../../database/delivery";
 import { getAuth } from "firebase/auth";
 import { useDispatch } from "react-redux";
-import { fetchDeliveries } from "../../store/slices/delivery";
-export const EditDeliveryScreen = ({ route, navigation }) => {
+import { fetchDeliveries } from "../../../store/slices/delivery";
+export const AddDeliveryScreen = ({ route, navigation }) => {
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("0.1");
   const [markerPosition, setMarkerPosition] = useState("");
-  const [estado, setEstado] = useState("");
-  const { itemId } = route.params;
   const dispatch = useDispatch();
-  useEffect(() => {
-    let mounted = true;
-    getDelivery(itemId).then((item) => {
-      if (mounted) {
-        setNombre(item.nombre);
-        setDescripcion(item.descripcion);
-        setPrecio(item.precio);
-        setMarkerPosition(item.location);
-        setEstado(item.state);
-      }
-    });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const onMapPress = (e) => {
-    console.log(e.nativeEvent.coordinate);
-    setMarkerPosition(e.nativeEvent.coordinate);
-  };
 
   const save = async () => {
     if (
@@ -70,26 +43,11 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
         state: "available",
         createdAt: Date.now(),
       };
-      await updateDelivery(itemId, delivery);
+      await createDelivery(delivery);
       dispatch(fetchDeliveries({ statusFilter: route.params.statusFilter }));
       navigation.goBack();
     } else Toast.show({ description: "Lleno todos los campos correctamente" });
   };
-  const deleteItem = () => {
-    Alert.alert("Alerta", "Está seguro de elimar la entrega?", [
-      {
-        text: "Aceptar",
-        onPress: () => {
-          removeDelivery(itemId);
-          navigation.goBack();
-        },
-      },
-      {
-        text: "Cancelar",
-      },
-    ]);
-  };
-
   return (
     <NativeBaseProvider>
       <VStack w="100%" h="100%" bg="white" p={2}>
@@ -99,7 +57,6 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
             placeholder="Nombre de la entrega"
             value={nombre}
             onChangeText={(e) => setNombre(e)}
-            isDisabled={estado != "available" ? true : false}
           />
         </FormControl>
         <FormControl isRequired mb={4}>
@@ -109,7 +66,6 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
             h={20}
             value={descripcion}
             onChangeText={(e) => setDescripcion(e)}
-            isDisabled={estado != "available" ? true : false}
           />
         </FormControl>
         <FormControl isRequired mb={4}>
@@ -119,7 +75,6 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
             keyboardType="decimal-pad"
             value={precio}
             onChangeText={(e) => setPrecio(e)}
-            isDisabled={estado != "available" ? true : false}
           />
         </FormControl>
         <Text>Seleccione la ubicación de entrega:</Text>
@@ -131,27 +86,13 @@ export const EditDeliveryScreen = ({ route, navigation }) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
-          onPress={onMapPress}
+          onPress={(e) => setMarkerPosition(e.nativeEvent.coordinate)}
         >
-          {markerPosition ? (
-            <Marker
-              coordinate={{
-                latitude: markerPosition.latitude,
-                longitude: markerPosition.longitude,
-              }}
-            />
-          ) : null}
+          {markerPosition ? <Marker coordinate={markerPosition} /> : null}
         </MapView>
-        {estado == "available" ? (
-          <>
-            <Button mt={4} size="lg" onPress={save}>
-              Salvar
-            </Button>
-            <Button mt={4} colorScheme="danger" onPress={deleteItem}>
-              Eliminar
-            </Button>
-          </>
-        ) : null}
+        <Button mt={4} size="lg" onPress={save}>
+          Salvar
+        </Button>
       </VStack>
     </NativeBaseProvider>
   );

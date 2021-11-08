@@ -6,11 +6,11 @@ import {
   Text,
   VStack,
 } from "native-base";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDeliveries } from "../store/slices/delivery";
+import { fetchDeliveries } from "../../store/slices/delivery";
 
 export const MapBusinessScreen = ({ navigation }) => {
   const deliveries = useSelector((state) => state.delivery.deliveries);
@@ -43,10 +43,10 @@ export const MapBusinessScreen = ({ navigation }) => {
                     description={delivery.descripcion}
                     image={
                       delivery.state == "available"
-                        ? require("../assets/pins/pin_red.png")
+                        ? require("../../assets/pins/pin_red.png")
                         : delivery.state == "taked"
-                        ? require("../assets/pins/pin_blue.png")
-                        : require("../assets/pins/pin_green.png")
+                        ? require("../../assets/pins/pin_blue.png")
+                        : require("../../assets/pins/pin_green.png")
                     }
                   />
                 );
@@ -58,7 +58,7 @@ export const MapBusinessScreen = ({ navigation }) => {
             <Text>Leyenda:</Text>
             <HStack p={1} alignItems="center">
               <Image
-                source={require("../assets/pins/pin_red.png")}
+                source={require("../../assets/pins/pin_red.png")}
                 size="2xs"
                 alt="Disponible "
               />
@@ -66,7 +66,7 @@ export const MapBusinessScreen = ({ navigation }) => {
             </HStack>
             <HStack p={1} alignItems="center">
               <Image
-                source={require("../assets/pins/pin_blue.png")}
+                source={require("../../assets/pins/pin_blue.png")}
                 size="2xs"
                 alt="Tomada"
               />
@@ -74,7 +74,7 @@ export const MapBusinessScreen = ({ navigation }) => {
             </HStack>
             <HStack p={1} alignItems="center">
               <Image
-                source={require("../assets/pins/pin_green.png")}
+                source={require("../../assets/pins/pin_green.png")}
                 size="2xs"
                 alt="Entregada"
               />

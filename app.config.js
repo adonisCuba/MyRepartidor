@@ -20,6 +20,7 @@ export default {
     },
     android: {
       package: "cu.adonis.myrepartidor",
+      googleServicesFile: "./google-services.json",
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#FFFFFF",

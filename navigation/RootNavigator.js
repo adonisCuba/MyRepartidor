@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { View, ActivityIndicator, Text, Platform } from "react-native";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import { AuthenticatedUserContext } from "./AuthenticatedUserProvider";
 import AuthStack from "./AuthStack";
-import HomeStack from "./HomeStack";
 import "../config/firebase";
 import {
   getFirestore,
@@ -17,6 +16,9 @@ import {
 } from "firebase/firestore";
 import * as SecureStore from "expo-secure-store";
 import BusinessStack from "./BusinessStack";
+import DeliveryBoyStack from "./DeliveryBoyStack";
+import * as Notifications from "expo-notifications";
+import NoUserTypeStack from "./NoUserTypeStack";
 
 const auth = getAuth();
 
@@ -24,6 +26,9 @@ export default function RootNavigator() {
   const { user, setUser } = useContext(AuthenticatedUserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState("");
+  const [notification, setNotification] = useState(false);
+  const notificationListener = useRef();
+  const responseListener = useRef();
 
   const onAuthenticated = async (authenticatedUser) => {
     const db = getFirestore();
@@ -35,10 +40,23 @@ export default function RootNavigator() {
     const queryResult = await getDocs(q);
     queryResult.forEach((doc) => {
       setUserRole(doc.data().typeUser);
-      if (Platform.OS != "web")
+      console.log(doc.data().typeUser);
+      if (Platform.OS != "web") {
         SecureStore.setItemAsync("userRole", doc.data().typeUser);
+        SecureStore.setItemAsync("expoPushToken", doc.data().expoPushToken);
+      }
     });
     setUser(authenticatedUser);
+    // Se dispara cuando la nitificacion se recive mientras la app esta foregrounded
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        setNotification(notification);
+      });
+    // Se dispara cuando el usuario selecciona la notificacion (funciona en cualquier estado de la app)
+    responseListener.current =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
   };
 
   useEffect(() => {
@@ -58,7 +76,13 @@ export default function RootNavigator() {
     );
 
     // unsubscribe auth listener on unmount
-    return unsubscribeAuth;
+    return () => {
+      unsubscribeAuth;
+      Notifications.removeNotificationSubscription(
+        notificationListener.current
+      );
+      Notifications.removeNotificationSubscription(responseListener.current);
+    };
   }, []);
 
   if (isLoading) {
@@ -74,8 +98,10 @@ export default function RootNavigator() {
       {user ? (
         userRole == "business" ? (
           <BusinessStack />
+        ) : userRole == "delivery boy" ? (
+          <DeliveryBoyStack />
         ) : (
-          <HomeStack />
+          <NoUserTypeStack />
         )
       ) : (
         <AuthStack />
